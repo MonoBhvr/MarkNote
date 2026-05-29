@@ -1,0 +1,45 @@
+{
+  "name": "strict-markdown-html-converter",
+  "version": "14.2.0",
+  "description": "Strict Markdown-to-HTML converter based on markdown-it.",
+  "keywords": [
+    "markdown",
+    "parser",
+    "commonmark",
+    "markdown-it"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./index.mjs",
+    "./browser": "./dist/strict-markdown-html-converter.mjs",
+    "./browser-global": "./dist/strict-markdown-html-converter.js"
+  },
+  "scripts": {
+    "build:browser": "npm run build:katex-css && npm run build:browser:module && npm run build:browser:global",
+    "build:katex-css": "node -e \"const fs = require('node:fs'); fs.mkdirSync('dist', { recursive: true }); fs.copyFileSync('node_modules/katex/dist/katex.min.css', 'dist/katex.min.css')\"",
+    "build:browser:module": "esbuild index.mjs --bundle --format=esm --platform=browser --target=es2020 --minify --legal-comments=eof --outfile=dist/strict-markdown-html-converter.mjs",
+    "build:browser:global": "esbuild index.mjs --bundle --format=iife --global-name=StrictMarkdownHtmlConverter --platform=browser --target=es2020 --minify --legal-comments=eof --outfile=dist/strict-markdown-html-converter.js",
+    "lint": "eslint .",
+    "test": "npm run lint && npm run build:browser && node --test test/markdown-it/*.test.mjs"
+  },
+  "files": [
+    "dist/",
+    "index.mjs",
+    "lib/"
+  ],
+  "dependencies": {
+    "entities": "^4.5.0",
+    "highlight.js": "^11.11.1",
+    "katex": "^0.17.0",
+    "linkify-it": "^5.0.1",
+    "mdurl": "^2.0.0",
+    "punycode.js": "^2.3.1",
+    "uc.micro": "^2.1.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.0",
+    "eslint": "^9.39.4",
+    "neostandard": "^0.13.0"
+  }
+}
