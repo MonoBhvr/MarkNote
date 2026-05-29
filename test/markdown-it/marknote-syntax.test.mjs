@@ -32,16 +32,16 @@ describe('MarkNote syntax', function () {
   })
 
   it('supports custom escapes', function () {
-    assert.strictEqual(renderMarkdownToHtml('a\\nb'), '<p>a\nb</p>\n')
-    assert.strictEqual(renderMarkdownToHtml('a\\tb'), '<p>a\tb</p>\n')
+    assert.strictEqual(renderMarkdownToHtml('a\\nb'), '<p>a<br>\nb</p>\n')
+    assert.strictEqual(renderMarkdownToHtml('a\\tb'), '<p>a&emsp;b</p>\n')
     assert.strictEqual(renderMarkdownToHtml('\\// not comment'), '<p>// not comment</p>\n')
     assert.strictEqual(renderMarkdownToHtml('\\{==literal==\\}'), '<p>==literal==</p>\n')
   })
 
   it('renders fold blocks and generic bordered blocks', function () {
     const fold = renderMarkdownToHtml('[fold[\nFold title\n**inside**\n]]')
-    assert.match(fold, /<details class="marknote-fold">/)
-    assert.match(fold, /<summary>Fold title<\/summary>/)
+    assert.match(fold, /<details class="marknote-fold marknote-block">/)
+    assert.match(fold, /<summary><span>Fold title<\/span><\/summary>/)
     assert.match(fold, /<strong>inside<\/strong>/)
     assert.doesNotMatch(fold, /<p>Fold title<\/p>/)
 
@@ -54,10 +54,26 @@ describe('MarkNote syntax', function () {
     assert.match(emptyAttr, /<strong>plain block<\/strong>/)
   })
 
+  it('supports fold open and closed suffixes', function () {
+    const openFold = renderMarkdownToHtml('[fold+[\nOpen title\nBody\n]]')
+    assert.match(openFold, /<details class="marknote-fold marknote-block" open>/)
+
+    const openShortFold = renderMarkdownToHtml('[>+[\nOpen short\nBody\n]]')
+    assert.match(openShortFold, /<details class="marknote-fold marknote-block" open>/)
+
+    const closedFold = renderMarkdownToHtml('[fold-[\nClosed title\nBody\n]]')
+    assert.match(closedFold, /<details class="marknote-fold marknote-block">/)
+    assert.doesNotMatch(closedFold, /<details[^>]* open/)
+
+    const closedShortFold = renderMarkdownToHtml('[>-[\nClosed short\nBody\n]]')
+    assert.match(closedShortFold, /<details class="marknote-fold marknote-block">/)
+    assert.doesNotMatch(closedShortFold, /<details[^>]* open/)
+  })
+
   it('renders nested blocks with generic block wrappers', function () {
     const nested = renderMarkdownToHtml('[fold[\nOuter title\n[note[\n==inner==\n]]\n]]')
-    assert.match(nested, /<details class="marknote-fold">/)
-    assert.match(nested, /<summary>Outer title<\/summary>/)
+    assert.match(nested, /<details class="marknote-fold marknote-block">/)
+    assert.match(nested, /<summary><span>Outer title<\/span><\/summary>/)
     assert.match(nested, /marknote-highlight/)
     assert.doesNotMatch(nested, /\[fold\[/)
     assert.doesNotMatch(nested, /\]\]/)
@@ -72,6 +88,29 @@ describe('MarkNote syntax', function () {
     assert.match(renderMarkdownToHtml('[web[https://example.com | Web]]'), /<iframe sandbox="allow-same-origin allow-scripts" src="https:\/\/example\.com"/)
     assert.match(renderMarkdownToHtml('[html[<script>alert(1)</script>]]'), /<iframe class="marknote-embed marknote-embed-html" sandbox srcdoc="&lt;script&gt;alert\(1\)&lt;\/script&gt;">/)
     assert.match(renderMarkdownToHtml('[card[https://example.com | Example]]'), /<a class="marknote-card" href="https:\/\/example\.com">Example<\/a>/)
+  })
+
+  it('combines block attributes by category and rejects duplicate embeds', function () {
+    const typed = renderMarkdownToHtml('[! blue[\n**warning**\n]]')
+    assert.match(typed, /marknote-block-type-warning/)
+    assert.match(typed, /marknote-block-color-blue/)
+    assert.match(typed, /marknote-block-marker[^>]*>!<\/span>/)
+    assert.match(typed, /<strong>warning<\/strong>/)
+
+    const foldEmbed = renderMarkdownToHtml('[fold web[\nWeb fold\nhttps://example.com | Example\n]]')
+    assert.match(foldEmbed, /<summary><span>Web fold<\/span><\/summary>/)
+    assert.match(foldEmbed, /marknote-embed-web/)
+    assert.match(foldEmbed, /src="https:\/\/example\.com"/)
+
+    const typedFold = renderMarkdownToHtml('[! fold red[\nAlert fold\nBody\n]]')
+    assert.match(typedFold, /<details class="marknote-fold marknote-block marknote-block-has-type marknote-block-type-warning marknote-block-color-red">/)
+    assert.match(typedFold, /<summary><span class="marknote-block-marker" aria-hidden="true">!<\/span><span>Alert fold<\/span><\/summary>/)
+    assert.doesNotMatch(typedFold, /<div class="marknote-block(?:\s|")/)
+
+    const duplicateEmbed = renderMarkdownToHtml('[image web[\nhttps://example.com | Example\n]]')
+    assert.doesNotMatch(duplicateEmbed, /marknote-embed-image/)
+    assert.doesNotMatch(duplicateEmbed, /marknote-embed-web/)
+    assert.match(duplicateEmbed, /<div class="marknote-block">/)
   })
 
   it('renders inline footnotes and appends footnote section', function () {

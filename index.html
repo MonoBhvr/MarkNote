@@ -301,17 +301,100 @@
 
       #preview .marknote-fold,
       #preview .marknote-block {
-        background: #fffbf2;
+        background: var(--marknote-block-color, #fffbf2);
         border: 1px solid var(--line-strong);
         border-radius: 14px;
         margin: 16px 0;
         padding: 12px 14px;
       }
 
+      #preview .marknote-block-has-type:not(.marknote-fold) {
+        display: grid;
+        gap: 12px;
+        grid-template-columns: auto minmax(0, 1fr);
+      }
+
+      #preview .marknote-block-marker {
+        align-items: center;
+        background: rgba(255, 255, 255, 0.65);
+        border: 1px solid var(--line-strong);
+        border-radius: 999px;
+        color: var(--accent);
+        display: inline-flex;
+        font: 800 0.82rem/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        height: 26px;
+        justify-content: center;
+        width: 26px;
+      }
+
+      #preview .marknote-block-content > :first-child {
+        margin-top: 0;
+      }
+
+      #preview .marknote-block-content > :last-child {
+        margin-bottom: 0;
+      }
+
+      #preview .marknote-block-color-red {
+        --marknote-block-color: #fff1f2;
+      }
+
+      #preview .marknote-block-color-blue {
+        --marknote-block-color: #eff6ff;
+      }
+
+      #preview .marknote-block-color-green {
+        --marknote-block-color: #ecfdf5;
+      }
+
+      #preview .marknote-block-color-yellow {
+        --marknote-block-color: #fefce8;
+      }
+
+      #preview .marknote-block-color-orange {
+        --marknote-block-color: #fff7ed;
+      }
+
+      #preview .marknote-block-color-purple {
+        --marknote-block-color: #faf5ff;
+      }
+
+      #preview .marknote-block-color-gray {
+        --marknote-block-color: #f5f5f4;
+      }
+
       #preview .marknote-fold summary {
+        align-items: center;
         color: var(--accent);
         cursor: pointer;
+        display: flex;
+        gap: 10px;
         font-weight: 700;
+        list-style: none;
+      }
+
+      #preview .marknote-fold summary::-webkit-details-marker {
+        display: none;
+      }
+
+      #preview .marknote-fold summary::before {
+        align-items: center;
+        background: rgba(180, 83, 9, 0.1);
+        border: 1px solid rgba(180, 83, 9, 0.25);
+        border-radius: 999px;
+        content: '›';
+        display: inline-flex;
+        flex: 0 0 auto;
+        font: 900 1rem/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        height: 22px;
+        justify-content: center;
+        transition: transform 160ms ease, background 160ms ease;
+        width: 22px;
+      }
+
+      #preview .marknote-fold[open] summary::before {
+        background: rgba(180, 83, 9, 0.16);
+        transform: rotate(90deg);
       }
 
       #preview .marknote-embed,
@@ -433,6 +516,14 @@ Footnotes can be unnamed[^ **Bold footnote** with [a link](https://example.com).
 This is a normal bordered block. It has no special attribute, but inner **Markdown** and ==MarkNote== syntax still render.
 ]]
 
+[! red[
+Warning-style colored block. Type and color attributes can be combined.
+]]
+
+[? #e0f2fe[
+Question-style block with a custom hex color.
+]]
+
 [fold[
 Nested fold title
 This fold contains **Markdown**, ==MarkNote highlight==, and a nested block.
@@ -440,6 +531,15 @@ This fold contains **Markdown**, ==MarkNote highlight==, and a nested block.
 [note[
 Unknown block attributes render as normal bordered blocks, and inner MarkNote renders.
 ]]
+]]
+
+[fold web[
+Folded web embed
+https://velog.io | Velog in a fold
+]]
+
+[image web[
+https://example.com | Duplicate embed attrs become a normal block.
 ]]
 
 ## Embeds {#embeds}
