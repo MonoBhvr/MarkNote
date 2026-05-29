@@ -193,10 +193,61 @@
 
       #preview pre {
         background: var(--code);
+        border: 0;
+        border-radius: 0 0 12px 12px;
+        overflow: auto;
+        margin: 0;
+        padding: 14px;
+      }
+
+      #preview .code-frame {
+        background: var(--code);
         border: 1px solid var(--line);
         border-radius: 12px;
-        overflow: auto;
-        padding: 14px;
+        margin: 16px 0;
+        overflow: hidden;
+      }
+
+      #preview .code-toolbar {
+        align-items: center;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        justify-content: space-between;
+        min-height: 40px;
+        padding: 7px 10px 7px 14px;
+      }
+
+      #preview .code-language {
+        color: var(--muted);
+        font: 700 0.72rem/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      #preview .copy-code {
+        background: var(--panel);
+        border: 1px solid var(--line-strong);
+        border-radius: 999px;
+        color: var(--muted);
+        cursor: pointer;
+        font: 700 0.72rem/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        letter-spacing: 0.08em;
+        padding: 7px 10px;
+        text-transform: uppercase;
+        transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+      }
+
+      #preview .copy-code:hover,
+      #preview .copy-code:focus-visible {
+        background: var(--accent-soft);
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+
+      #preview .copy-code.is-copied {
+        background: #ecfdf5;
+        border-color: #059669;
+        color: #047857;
       }
 
       #preview code {
@@ -458,11 +509,75 @@ console.log(answer)
       const status = document.querySelector('#status')
       const { renderMarkdownToHtml } = StrictMarkdownHtmlConverter
 
+      async function copyText (text) {
+        if (navigator.clipboard?.writeText) {
+          await navigator.clipboard.writeText(text)
+          return
+        }
+
+        const buffer = document.createElement('textarea')
+        buffer.value = text
+        buffer.setAttribute('readonly', '')
+        buffer.style.position = 'fixed'
+        buffer.style.opacity = '0'
+        document.body.appendChild(buffer)
+        buffer.select()
+        document.execCommand('copy')
+        buffer.remove()
+      }
+
+      function addCodeCopyButtons () {
+        for (const pre of preview.querySelectorAll('pre')) {
+          const code = pre.querySelector('code')
+          if (!code) continue
+
+          const language = [...code.classList]
+            .find(className => className.startsWith('language-'))
+            ?.slice('language-'.length) || 'text'
+
+          const frame = document.createElement('div')
+          frame.className = 'code-frame'
+          pre.before(frame)
+
+          const toolbar = document.createElement('div')
+          toolbar.className = 'code-toolbar'
+          const label = document.createElement('span')
+          label.className = 'code-language'
+          label.textContent = language
+
+          toolbar.appendChild(label)
+          frame.appendChild(toolbar)
+          frame.appendChild(pre)
+
+          const button = document.createElement('button')
+          button.className = 'copy-code'
+          button.type = 'button'
+          button.textContent = 'Copy'
+          button.setAttribute('aria-label', 'Copy code block')
+          button.addEventListener('click', async () => {
+            try {
+              await copyText(code.textContent)
+              button.textContent = 'Copied'
+              button.classList.add('is-copied')
+              status.textContent = 'Code copied'
+              setTimeout(() => {
+                button.textContent = 'Copy'
+                button.classList.remove('is-copied')
+              }, 1400)
+            } catch (error) {
+              status.textContent = 'Copy failed'
+            }
+          })
+          toolbar.appendChild(button)
+        }
+      }
+
       function render () {
         try {
           const html = renderMarkdownToHtml(markdown.value)
 
           preview.innerHTML = html
+          addCodeCopyButtons()
           status.textContent = `${markdown.value.length} chars rendered`
         } catch (error) {
           preview.innerHTML = ''
