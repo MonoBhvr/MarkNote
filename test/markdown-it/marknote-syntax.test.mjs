@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 
 import { renderMarkdownToHtml } from '../../index.mjs'
-import MarkdownIt from '../../lib/index.mjs'
+import MarkNoteEngine from '../../lib/index.mjs'
 import marknotePlugin from '../../lib/marknote/index.mjs'
 
 describe('MarkNote syntax', function () {
@@ -123,7 +123,7 @@ describe('MarkNote syntax', function () {
   })
 
   it('records table-of-contents metadata for anchored headings', function () {
-    const md = new MarkdownIt({ html: false })
+    const md = new MarkNoteEngine({ html: false })
     md.use(marknotePlugin)
     const env = {}
     md.render('# One {#}\n\n## Two {#two}\n\nbody {#spot}', env)

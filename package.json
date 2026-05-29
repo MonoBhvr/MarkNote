@@ -1,12 +1,12 @@
 {
-  "name": "strict-markdown-html-converter",
+  "name": "marknote",
   "version": "14.2.0",
-  "description": "Strict Markdown-to-HTML converter based on markdown-it.",
+  "description": "MarkNote markup renderer for math, rich blocks, embeds, anchors, comments, and term previews.",
   "keywords": [
     "markdown",
     "parser",
     "commonmark",
-    "markdown-it"
+    "notes"
   ],
   "license": "MIT",
   "type": "module",
@@ -21,7 +21,7 @@
     "build:browser:module": "esbuild index.mjs --bundle --format=esm --platform=browser --target=es2020 --minify --legal-comments=eof --outfile=dist/strict-markdown-html-converter.mjs",
     "build:browser:global": "esbuild index.mjs --bundle --format=iife --global-name=StrictMarkdownHtmlConverter --platform=browser --target=es2020 --minify --legal-comments=eof --outfile=dist/strict-markdown-html-converter.js",
     "lint": "eslint .",
-    "test": "npm run lint && npm run build:browser && node --test test/markdown-it/*.test.mjs"
+    "test": "npm run lint && npm run build:browser && node --test test/**/*.test.mjs"
   },
   "files": [
     "dist/",
