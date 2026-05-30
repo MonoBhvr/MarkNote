@@ -17,11 +17,12 @@
   },
   "scripts": {
     "build:browser": "npm run build:katex-css && npm run build:browser:module && npm run build:browser:global",
-    "build:katex-css": "node -e \"const fs = require('node:fs'); fs.mkdirSync('dist', { recursive: true }); fs.copyFileSync('node_modules/katex/dist/katex.min.css', 'dist/katex.min.css')\"",
+    "build:katex-css": "node -e \"const fs = require('node:fs'); fs.mkdirSync('dist', { recursive: true }); fs.copyFileSync('node_modules/katex/dist/katex.min.css', 'dist/katex.min.css'); fs.cpSync('node_modules/katex/dist/fonts', 'dist/fonts', { recursive: true })\"",
     "build:browser:module": "esbuild index.mjs --bundle --format=esm --platform=browser --target=es2020 --minify --legal-comments=eof --outfile=dist/strict-markdown-html-converter.mjs",
     "build:browser:global": "esbuild index.mjs --bundle --format=iife --global-name=StrictMarkdownHtmlConverter --platform=browser --target=es2020 --minify --legal-comments=eof --outfile=dist/strict-markdown-html-converter.js",
     "lint": "eslint .",
-    "test": "npm run lint && npm run build:browser && node --test test/**/*.test.mjs"
+    "test": "npm run lint && npm run build:browser && node --test test/**/*.test.mjs",
+    "update:typst-math": "node scripts/update-typst-math.mjs"
   },
   "files": [
     "dist/",
