@@ -87,7 +87,21 @@ describe('MarkNote syntax', function () {
     assert.match(renderMarkdownToHtml('[image[./a.png | Caption]]'), /<img src="\.\/a\.png" alt="Caption">/)
     assert.match(renderMarkdownToHtml('[web[https://example.com | Web]]'), /<iframe sandbox="allow-same-origin allow-scripts" src="https:\/\/example\.com"/)
     assert.match(renderMarkdownToHtml('[html[<script>alert(1)</script>]]'), /<iframe class="marknote-embed marknote-embed-html" sandbox srcdoc="&lt;script&gt;alert\(1\)&lt;\/script&gt;">/)
-    assert.match(renderMarkdownToHtml('[card[https://example.com | Example]]'), /<a class="marknote-card" href="https:\/\/example\.com">Example<\/a>/)
+    assert.match(renderMarkdownToHtml('[card[https://example.com | Example]]'), /<a class="marknote-card" href="https:\/\/example\.com" data-marknote-card-url="https:\/\/example\.com" data-marknote-card-title="Example" data-marknote-card-layout="classic">Example<\/a>/)
+    assert.match(renderMarkdownToHtml('[card row[https://example.com | Example]]'), /data-marknote-card-layout="row"/)
+    assert.match(renderMarkdownToHtml('[card(notion)[https://example.com | Example]]'), /data-marknote-card-layout="notion"/)
+    assert.match(renderMarkdownToHtml('[card[https://example.com]]'), /data-marknote-card-title="https:\/\/example\.com"/)
+    assert.match(renderMarkdownToHtml('[card[https://example.com | <script>]]'), /data-marknote-card-title="&lt;script&gt;"/)
+    assert.match(renderMarkdownToHtml('[card notion[https://example.com | Example]@{width: 320px, height: auto, align: right}]'), /data-marknote-card-width="320px" data-marknote-card-height="auto" data-marknote-card-align="right"/)
+  })
+
+  it('applies optional block layout styles', function () {
+    const styled = renderMarkdownToHtml('[[\n**plain block**\n]@{width: 50%, height: 120px, align: center}]')
+    assert.match(styled, /style="width: 50%; height: 120px; margin-left: auto; margin-right: auto"/)
+    assert.match(styled, /<strong>plain block<\/strong>/)
+
+    const invalid = renderMarkdownToHtml('[[\nplain\n]@{width: javascript:alert(1), height: 10em, align: top}]')
+    assert.doesNotMatch(invalid, /style=/)
   })
 
   it('combines block attributes by category and rejects duplicate embeds', function () {
